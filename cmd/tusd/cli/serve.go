@@ -1,11 +1,40 @@
 package cli
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
+	"github.com/sethgrid/pester"
 	"github.com/tus/tusd"
 )
+
+func checkFileGetAuthHTTP(id string) bool {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", Flags.HttpHooksEndpoint, id), nil)
+	if err != nil {
+		return false
+	}
+
+	// Use linear backoff strategy with the user defined values.
+	client := pester.New()
+	client.KeepLog = true
+	client.MaxRetries = Flags.HttpHooksRetry
+	client.Backoff = func(_ int) time.Duration {
+		return time.Duration(Flags.HttpHooksBackoff) * time.Second
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return false
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		return true
+	}
+	return false
+
+}
 
 func Serve() {
 	SetupPreHooks(Composer)
@@ -19,6 +48,7 @@ func Serve() {
 		NotifyTerminatedUploads: true,
 		NotifyUploadProgress:    true,
 		NotifyCreatedUploads:    true,
+		AuthFuncGet:             checkFileGetAuthHTTP,
 	})
 	if err != nil {
 		stderr.Fatalf("Unable to create handler: %s", err)

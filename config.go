@@ -43,6 +43,8 @@ type Config struct {
 	// potentially set by proxies when generating an absolute URL in the
 	// response to POST requests.
 	RespectForwardedHeaders bool
+
+	AuthFuncGet func(id string) bool
 }
 
 func (config *Config) validate() error {

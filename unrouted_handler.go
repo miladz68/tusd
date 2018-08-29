@@ -73,6 +73,9 @@ type UnroutedHandler struct {
 	logger        *log.Logger
 	extensions    string
 
+	//Function to call to authorized Getting files
+	AuthFuncGet func(id string) bool
+
 	// CompleteUploads is used to send notifications whenever an upload is
 	// completed by a user. The FileInfo will contain information about this
 	// upload after it is completed. Sending to this channel will only
@@ -135,6 +138,7 @@ func NewUnroutedHandler(config Config) (*UnroutedHandler, error) {
 		logger:            config.Logger,
 		extensions:        extensions,
 		Metrics:           newMetrics(),
+		AuthFuncGet:       config.AuthFuncGet,
 	}
 
 	return handler, nil
@@ -549,6 +553,11 @@ func (handler *UnroutedHandler) GetFile(w http.ResponseWriter, r *http.Request) 
 		}
 
 		defer locker.UnlockUpload(id)
+	}
+	ok := handler.AuthFuncGet(id)
+	if !ok {
+		handler.sendResp(w, r, http.StatusForbidden)
+		return
 	}
 
 	info, err := handler.composer.Core.GetInfo(id)
