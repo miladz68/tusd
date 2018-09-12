@@ -281,6 +281,7 @@ func (handler *UnroutedHandler) PostFile(w http.ResponseWriter, r *http.Request)
 		IsFinal:        isFinal,
 		PartialUploads: partialUploads,
 	}
+	info.HTTPRequestHeaders = r.Header
 
 	id, err := handler.composer.Core.NewUpload(info)
 	if err != nil {
@@ -289,7 +290,6 @@ func (handler *UnroutedHandler) PostFile(w http.ResponseWriter, r *http.Request)
 	}
 
 	info.ID = id
-	info.HTTPRequestHeaders = r.Header
 
 	// Add the Location header directly after creating the new resource to even
 	// include it in cases of failure when an error is returned
