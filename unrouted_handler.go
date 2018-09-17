@@ -572,6 +572,7 @@ func (handler *UnroutedHandler) GetFile(w http.ResponseWriter, r *http.Request) 
 	contentType, contentDisposition := filterContentType(info)
 	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("Content-Disposition", contentDisposition)
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	// If no data has been uploaded yet, respond with an empty "204 No Content" status.
 	if info.Offset == 0 {
