@@ -9,11 +9,12 @@ import (
 	"github.com/tus/tusd"
 )
 
-func checkFileGetAuthHTTP(id string) bool {
+func checkFileGetAuthHTTP(id string, headers http.Header) bool {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", Flags.HttpHooksEndpoint, id), nil)
 	if err != nil {
 		return false
 	}
+	req.Header = headers
 
 	// Use linear backoff strategy with the user defined values.
 	client := pester.New()

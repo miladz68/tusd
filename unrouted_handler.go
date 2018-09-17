@@ -74,7 +74,7 @@ type UnroutedHandler struct {
 	extensions    string
 
 	//Function to call to authorized Getting files
-	AuthFuncGet func(id string) bool
+	AuthFuncGet func(id string, header http.Header) bool
 
 	// CompleteUploads is used to send notifications whenever an upload is
 	// completed by a user. The FileInfo will contain information about this
@@ -554,7 +554,7 @@ func (handler *UnroutedHandler) GetFile(w http.ResponseWriter, r *http.Request) 
 
 		defer locker.UnlockUpload(id)
 	}
-	ok := handler.AuthFuncGet(id)
+	ok := handler.AuthFuncGet(id, r.Header)
 	if !ok {
 		handler.sendResp(w, r, http.StatusForbidden)
 		return

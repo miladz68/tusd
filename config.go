@@ -3,6 +3,7 @@ package tusd
 import (
 	"errors"
 	"log"
+	"net/http"
 	"net/url"
 	"os"
 )
@@ -44,7 +45,7 @@ type Config struct {
 	// response to POST requests.
 	RespectForwardedHeaders bool
 
-	AuthFuncGet func(id string) bool
+	AuthFuncGet func(id string, header http.Header) bool
 }
 
 func (config *Config) validate() error {
