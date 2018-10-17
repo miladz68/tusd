@@ -16,6 +16,8 @@
 package filestore
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -82,8 +84,29 @@ func (store FileStore) WriteChunk(id string, offset int64, src io.Reader) (int64
 		return 0, err
 	}
 	defer file.Close()
+	sha1hash := sha1.New()
 
-	n, err := io.Copy(file, src)
+	oldReader, err := store.GetReader(id)
+	if err != nil {
+		return 0, err
+	}
+
+	io.Copy(sha1hash, oldReader)
+
+	reader := io.TeeReader(src, sha1hash)
+
+	info, err := store.GetInfo(id)
+	if err != nil {
+		return 0, err
+	}
+
+	n, err := io.Copy(file, reader)
+
+	info.Offset += n
+
+	info.CheckSum.Sha1Sum = hex.EncodeToString(sha1hash.Sum(nil))
+
+	store.writeInfo(id, info)
 	return n, err
 }
 

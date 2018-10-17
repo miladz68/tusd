@@ -28,6 +28,10 @@ type FileInfo struct {
 	//Http headers that were submmited to the service.
 	//One can use this field to pass the headers around
 	HTTPRequestHeaders http.Header
+
+	CheckSum struct {
+		Sha1Sum string
+	}
 }
 
 type DataStore interface {
