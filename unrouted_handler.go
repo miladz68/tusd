@@ -504,6 +504,8 @@ func (handler *UnroutedHandler) writeChunk(id string, info FileInfo, w http.Resp
 	go handler.Metrics.incBytesReceived(uint64(bytesWritten))
 	info.Offset = newOffset
 
+	info, _ = handler.composer.Core.GetInfo(info.ID)
+
 	return handler.finishUploadIfComplete(info)
 }
 
