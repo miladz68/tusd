@@ -156,6 +156,9 @@ func invokeFileHook(name string, typ HookType, info tusd.FileInfo, captureOutput
 	env = append(env, "TUS_ID="+info.ID)
 	env = append(env, "TUS_SIZE="+strconv.FormatInt(info.Size, 10))
 	env = append(env, "TUS_OFFSET="+strconv.FormatInt(info.Offset, 10))
+	env = append(env, "DATA_DIR="+Flags.UploadDir)
+	env = append(env, "HOOK_ENDPOINT="+Flags.HttpHooksEndpoint)
+	env = append(env, "HOOK_ENDPOINT2="+Flags.UploadDir)
 
 	jsonInfo, err := json.Marshal(info)
 	if err != nil {
