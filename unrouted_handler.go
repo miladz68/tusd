@@ -572,6 +572,10 @@ func (handler *UnroutedHandler) GetFile(w http.ResponseWriter, r *http.Request) 
 	w.Header().Set("Content-Length", strconv.FormatInt(info.Offset, 10))
 
 	contentType, contentDisposition := filterContentType(info)
+	if len(r.URL.Query()["download"]) > 0 && r.URL.Query()["download"][0] == "true" {
+		contentType = "application/octet-stream"
+	}
+
 	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("Content-Disposition", contentDisposition)
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
