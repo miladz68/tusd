@@ -571,9 +571,14 @@ func (handler *UnroutedHandler) GetFile(w http.ResponseWriter, r *http.Request) 
 	// Set headers before sending responses
 	w.Header().Set("Content-Length", strconv.FormatInt(info.Offset, 10))
 
-	contentType, contentDisposition := filterContentType(info)
-	if len(r.URL.Query()["download"]) > 0 && r.URL.Query()["download"][0] == "true" {
-		contentType = "application/octet-stream"
+	contentType, contentDisposition := info.MetaData["filetype"], ""
+	if (len(r.URL.Query()["download"]) > 0 && r.URL.Query()["download"][0] == "true") || contentType == "application/octet-stream" {
+		contentDisposition = "attachment" + contentDisposition
+	} else {
+		contentDisposition = "inline" + contentDisposition
+	}
+	if filename, ok := info.MetaData["filename"]; ok {
+		contentDisposition += ";filename=" + strconv.Quote(filename)
 	}
 
 	w.Header().Set("Content-Type", contentType)
@@ -626,6 +631,7 @@ var mimeInlineBrowserWhitelist = map[string]struct{}{
 	"audio/ogg":       struct{}{},
 	"video/ogg ":      struct{}{},
 	"application/ogg": struct{}{},
+	"application/pdf": struct{}{},
 }
 
 // filterContentType returns the values for the Content-Type and
